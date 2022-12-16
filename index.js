@@ -23,6 +23,9 @@ app.use(cors(corstParams));
 app.get('/adatbevitel', function(req, res){
     res.sendFile(path.join(__dirname, "./frontend/appendForm.html"))
 })
+app.get('/my.js', function(req, res){
+    res.sendFile(path.join(__dirname, "./frontend/my.js"))
+})
 
 //get product by id
 app.get('/players/:id', function (req, res) {

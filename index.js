@@ -26,6 +26,13 @@ app.get('/adatbevitel', function(req, res){
 app.get('/my.js', function(req, res){
     res.sendFile(path.join(__dirname, "./frontend/my.js"))
 })
+// adatbevitel tablazat
+app.get('/focistak', function(req, res){
+    res.sendFile(path.join(__dirname, "./frontend/playerTable.html"))
+})
+app.get('/table.js', function(req, res){
+    res.sendFile(path.join(__dirname, "./frontend/table.js"))
+})
 
 //get product by id
 app.get('/players/:id', function (req, res) {

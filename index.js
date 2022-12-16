@@ -3,23 +3,32 @@ const fs = require("fs");
 const bodyParser = require("body-parser")
 const uniqid = require('uniqid'); 
 const sanitizeHtml = require('sanitize-html');
+const cors = require("cors");
 
-const dataFile = "./data/products.json";
+const dataFile = "./data/players.json";
 const port = 3000
 
 const app = express()
 
+//cors engedély
+const corstParams = {
+    origin: "*",
+    methods: ['GET','DELETE','UPDATE','PUT','PATCH']
+};
+
+app.use(cors(corstParams));
+
 //get product by id
-app.get('/products/:id', function (req, res) {
+app.get('/players/:id', function (req, res) {
     let id = req.params.id;
 
     //beolvassuk az összes adatot: json -> obj
     fs.readFile(dataFile, (error, data)=>{
-        let products = JSON.parse(data);
+        let players = JSON.parse(data);
 
         //megkeressük a megfelelő product-ot id alján
-        const productsById = products.find(product => product.id === id)
-        if (!productsById) {
+        const playersById = players.find(player => player.id === id)
+        if (!playersById) {
             // nincs meg
             let message = {
                 error: `id: ${id} not found`
@@ -29,31 +38,31 @@ app.get('/products/:id', function (req, res) {
             return;
         }
         //visszaküldjük
-        res.send(productsById);
+        res.send(playersById);
     });
 })
 
 //get products
-app.get('/products', function (req, res) {
+app.get('/players', function (req, res) {
     fs.readFile(dataFile, (error, data)=>{
-        let products = data;
-        res.send(products);
+        let players = data;
+        res.send(players);
     });
 })
 
 
 //delete product by id
-app.delete('/products/:id', function (req, res) {
+app.delete('/players/:id', function (req, res) {
     let id = req.params.id;
 
     //beolvassuk az összes adatot: json -> obj
     fs.readFile(dataFile, (error, data)=>{
-        let products = JSON.parse(data);
+        let players = JSON.parse(data);
 
         //megkeressük a megfelelő product indexét id alján
-        const productsIndexById = products.findIndex(product => product.id === id)
+        const playersIndexById = players.findIndex(player => player.id === id)
 
-        if (productsIndexById === -1) {
+        if (playersIndexById === -1) {
             // nincs meg
             let message = {
                 error: `id: ${id} not found`
@@ -63,11 +72,11 @@ app.delete('/products/:id', function (req, res) {
             return;
         }
         //letöröljük
-        products.splice(productsIndexById, 1);
+        players.splice(playersIndexById, 1);
 
         //visszaír: obj -> json
-        products = JSON.stringify(products)
-        fs.writeFile(dataFile, products, (error)=>{
+        players = JSON.stringify(players)
+        fs.writeFile(dataFile, players, (error)=>{
             console.log(error);
             //visszaküldjük, hogy melyik id-t töröltük
             res.send({id: id});
@@ -76,23 +85,25 @@ app.delete('/products/:id', function (req, res) {
 })
 
 //put product by id
-app.put('/products/:id', bodyParser.json(),function (req, res) {
+app.put('/players/:id', bodyParser.json(),function (req, res) {
     let id = req.params.id;
-    let putProduct = {
+    let putPlayer = {
         id: id, 
         name: sanitizeHtml(req.body.name),
-        quantity: req.body.quantity,
-        price: req.body.price,
-        type: sanitizeHtml(req.body.type)
+        qualification: +sanitizeHtml(req.body.qualification),
+        position: sanitizeHtml(req.body.position),
+        club: sanitizeHtml(req.body.club),
+        age: +sanitizeHtml(req.body.age),
+        nationality: sanitizeHtml(req.body.nationality)
     }
     //beolvassuk az összes adatot: json -> obj
     fs.readFile(dataFile, (error, data)=>{
-        let products = JSON.parse(data);
+        let players = JSON.parse(data);
 
         //megkeressük a megfelelő product indexét id alján
-        const productsIndexById = products.findIndex(product => product.id === id)
+        const playersIndexById = players.findIndex(player => player.id === id)
 
-        if (productsIndexById === -1) {
+        if (playersIndexById === -1) {
             // nincs meg
             let message = {
                 error: `id: ${id} not found`
@@ -102,45 +113,46 @@ app.put('/products/:id', bodyParser.json(),function (req, res) {
             return;
         }
         //felülírjuk
-        products[productsIndexById] = putProduct;
+        players[playersIndexById] = putPlayer;
 
         //visszaír: obj -> json
-        products = JSON.stringify(products)
-        fs.writeFile(dataFile, products, (error)=>{
+        players = JSON.stringify(players)
+        fs.writeFile(dataFile, players, (error)=>{
             console.log(error);
             //visszaküldjük, a módosított rekordot
-            res.send(putProduct);
+            res.send(putPlayer);
         })
     });
 })
 
 //post
-app.post('/products',bodyParser.json(), function (req, res) {
-    let newProduct = {
+app.post('/players',bodyParser.json(), function (req, res) {
+    let newPlayer = {
         id: uniqid(), 
         name: sanitizeHtml(req.body.name),
-        quantity: req.body.quantity,
-        price: req.body.price,
-        type: sanitizeHtml(req.body.type)
+        qualification: req.body.qualification,
+        position: sanitizeHtml(req.body.position),
+        club: sanitizeHtml(req.body.club),
+        age: req.body.age,
+        nationality: sanitizeHtml(req.body.nationality)
     }
-
     
     fs.readFile(dataFile,(error, data)=>{
         //beolvas, json -> obj
-        let products = JSON.parse(data);
+        let players = JSON.parse(data);
         //push
-        products.push(newProduct);
+        players.push(newPlayer);
         //visszaír: obj -> json
-        products = JSON.stringify(products)
-        fs.writeFile(dataFile, products, (error)=>{
+        players = JSON.stringify(players)
+        fs.writeFile(dataFile, players, (error)=>{
             console.log(error);
-            res.send(newProduct);
+            res.send(newPlayer);
         })
-
     })
-
 })
 
 app.listen(port)
+
+
 
 //<script>alert('betörtem')</scrip>
